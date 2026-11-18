@@ -11,6 +11,7 @@ export const site = {
   links: [
     { label: 'GitHub', handle: 'abhijitrakas', href: 'https://github.com/abhijitrakas' },
     { label: 'LinkedIn', handle: 'abhijit-rakas', href: 'https://www.linkedin.com/in/abhijit-rakas/' },
+    { label: 'WordPress', handle: 'abhijitrakas', href: 'https://profiles.wordpress.org/abhijitrakas/' },
     { label: 'Email', handle: 'abhijitrakas@gmail.com', href: 'mailto:abhijitrakas@gmail.com' },
   ],
 };

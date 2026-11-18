@@ -4,9 +4,12 @@ Personal site built with [Astro](https://astro.build).
 
 ## Editing
 
-- **Bio text:** `src/pages/index.astro`
+- **Bio and the “Beyond work” section:** `src/pages/index.astro`
 - **Name, links, link-preview description:** `src/data/site.ts`
 - **Colors, fonts, spacing:** `src/styles/global.css`
+- **Portrait:** `src/assets/portrait.webp`. The page blends its white paper into the background, so keep a white background with a soft fade at the bottom.
+- **Logo:** `src/assets/logo.svg` (page), `public/favicon.svg`, `public/apple-touch-icon.png`
+- **Link-preview image:** `public/og.jpg` (1200×630)
 
 ## Commands
 

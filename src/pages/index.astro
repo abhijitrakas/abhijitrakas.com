@@ -1,133 +1,303 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import logo from '../assets/logo.svg?raw';
+import portrait from '../assets/portrait.webp';
+import SocialLinks from '../components/SocialLinks.astro';
 import { site } from '../data/site';
+
+// Build-time year; a tiny script below keeps it current between deploys.
+const year = new Date().getFullYear();
+const wordcamp = 'https://nagpur.wordcamp.org/2017/organizers/';
 ---
 
 <Base>
-  <header class="reveal" style="--i: 0">
-    <!-- Placeholder until the photo arrives: swap for an <Image> from astro:assets. -->
-    <div class="avatar" aria-hidden="true">AR</div>
-    <h1>{site.name}</h1>
-    <p class="bio">
-      Software engineer at <a href={site.company.url}>{site.company.name}</a>. I build for the web
-      with WordPress, PHP and JavaScript, and enjoy making small tools that make developers’ lives
-      easier.
-    </p>
-  </header>
+  <div class="page">
+    <header>
+      <a class="logo reveal" style="--i: 0" href="/" aria-label={`${site.name}, home`} set:html={logo} />
+    </header>
 
-  <section class="reveal" style="--i: 1" aria-labelledby="connect">
-    <h2 id="connect">Connect</h2>
-    <ul class="links">
-      {
-        site.links.map((link) => (
+    <main>
+      <section class="hero">
+      <div class="intro">
+        <h1 class="reveal" style="--i: 1">I’m {site.name}<span class="dot">.</span></h1>
+
+        <p class="bio reveal" style="--i: 2">
+          Software engineer at <a href={site.company.url}>{site.company.name}</a>. I build for the web
+          with WordPress, PHP and JavaScript, and enjoy making small tools that make developers’ lives
+          easier.
+        </p>
+
+        <div class="links reveal" style="--i: 3">
+          <SocialLinks />
+        </div>
+      </div>
+
+      <figure class="portrait">
+        <Image
+          class="reveal"
+          style="--i: 1"
+          src={portrait}
+          alt={`Pencil sketch portrait of ${site.name}`}
+          widths={[360, 540, 720, 960, 1199]}
+          sizes="(max-width: 56rem) 22rem, 44rem"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </figure>
+      </section>
+
+      <section class="more" aria-labelledby="more-title">
+        <h2 id="more-title">Beyond work<span class="dot">.</span></h2>
+        <ul class="facts">
           <li>
-            <a href={link.href} rel={link.href.startsWith('http') ? 'me' : undefined}>
-              <span class="label">{link.label}</span>
-              <span class="handle">{link.handle}</span>
-              <svg class="arrow" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
-                <path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </a>
+            <h3>Community</h3>
+            <p>
+              I was one of the organizers of <a href={wordcamp}>WordCamp Nagpur 2017</a>. As Volunteer
+              Wrangler, I managed the entire volunteer team.
+            </p>
           </li>
-        ))
-      }
-    </ul>
-  </section>
+          <li>
+            <h3>Cricket</h3>
+            <p>
+              I love watching cricket and play whenever I get the time. Rohit Sharma is my favourite
+              player, and India’s series-winning victory at the Gabba in the <span class="nowrap">2020–21</span> Border-Gavaskar
+              Trophy is the greatest match I’ve watched.
+            </p>
+          </li>
+          <li>
+            <h3>Next up</h3>
+            <p>A bike tour, anywhere in India. It’s the next thing on my bucket list.</p>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="signoff">
+        <span class="footer-logo" aria-hidden="true" set:html={logo} />
+        <p>© <span id="year">{year}</span></p>
+      </div>
+      <SocialLinks size="small" />
+      <script is:inline>
+        document.getElementById('year').textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  </div>
 </Base>
 
 <style>
-  header {
-    margin-bottom: 3.5rem;
+  /* Column layout keeps the footer at the bottom when the page is short. */
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    max-width: 96rem;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 3vw, 2.75rem) clamp(1rem, 7.6vw, 7.5rem) clamp(2rem, 4vw, 3rem);
   }
 
-  .avatar {
+  .logo {
+    display: block;
+    width: clamp(3rem, 4.2vw, 4rem);
+    color: var(--fg);
+    border-radius: 2px;
+  }
+
+  .logo :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Padding scales with screen height so the hero roughly fills a desktop
+     first screen without leaving a void on tall windows. */
+  .hero {
     display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: 1.5rem;
-    border-radius: 999px;
-    background: var(--hover);
-    border: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    user-select: none;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: center;
+    gap: 2rem;
+    padding-block: clamp(1.5rem, 6vh, 4rem);
+  }
+
+  /* Keep text above the sketch's hatching where they overlap. */
+  .intro {
+    position: relative;
+    z-index: 1;
   }
 
   h1 {
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-family: var(--serif);
+    font-weight: 700;
+    /* Text optical size: sturdier, wider letterforms than the display cut. */
+    font-variation-settings: 'opsz' 24;
+    font-size: clamp(2.6rem, 1rem + 4.2vw, 5.25rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .dot {
+    color: var(--accent);
   }
 
   .bio {
-    margin-top: 0.25rem;
+    max-width: 26em;
+    margin-top: clamp(1.25rem, 2vw, 1.75rem);
     color: var(--muted);
+    font-size: clamp(1.0625rem, 0.8rem + 0.85vw, 1.5rem);
+    line-height: 1.65;
   }
 
-  .bio a {
+  .bio a,
+  .facts a {
     color: var(--fg);
     text-decoration-line: underline;
-    text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
+    text-decoration-color: var(--line);
     text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
+    text-underline-offset: 4px;
     transition: text-decoration-color 150ms;
   }
 
-  .bio a:hover {
-    text-decoration-color: currentColor;
-  }
-
-  h2 {
-    margin-bottom: 0.75rem;
-    color: var(--muted);
-    font-size: inherit;
-    font-weight: 400;
+  .bio a:hover,
+  .facts a:hover {
+    text-decoration-color: var(--accent);
   }
 
   .links {
-    list-style: none;
-    padding: 0;
-    margin: 0 -0.625rem;
+    margin-top: clamp(2.5rem, 4.5vw, 3.75rem);
   }
 
-  .links a {
+  /* The sketch's soft edges may drift into the text column, like the mockup. */
+  .portrait {
+    justify-self: end;
+    width: calc(100% + 6rem);
+    max-width: 44rem;
+    margin-left: -6rem;
+  }
+
+  /* Multiply lets the white paper of the sketch disappear into the page.
+     (The bottom fade is baked into the image, so no CSS mask is needed.) */
+  .portrait :global(img) {
+    display: block;
+    width: min(100%, calc((100svh - 12rem) * 0.914));
+    height: auto;
+    margin-left: auto;
+    mix-blend-mode: multiply;
+  }
+
+  main {
+    flex: 1;
+  }
+
+  .more {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  h2 {
+    margin: 0 0 clamp(1.75rem, 3vw, 2.75rem);
+    font-family: var(--serif);
+    font-weight: 700;
+    font-variation-settings: 'opsz' 24;
+    font-size: clamp(1.875rem, 1.2rem + 1.8vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .facts {
     display: grid;
-    grid-template-columns: 6rem 1fr auto;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.625rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background-color 150ms;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.75rem, 3.5vw, 3.5rem);
+    padding: 0;
+    list-style: none;
   }
 
-  .links a:hover {
-    background: var(--hover);
+  /* A short orange rule above each label echoes the headline's dot. */
+  h3 {
+    margin: 0 0 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .handle {
+  h3::before {
+    content: '';
+    display: block;
+    width: 1.5rem;
+    height: 2px;
+    margin-bottom: 0.875rem;
+    background: var(--accent);
+  }
+
+  .facts p {
+    max-width: 26em;
     color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: clamp(1rem, 0.92rem + 0.3vw, 1.125rem);
+    line-height: 1.65;
+  }
+
+  .nowrap {
     white-space: nowrap;
   }
 
-  .arrow {
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
     color: var(--muted);
-    transition: transform 150ms, color 150ms;
+    font-size: 0.875rem;
   }
 
-  .links a:hover .arrow {
+  .signoff {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .footer-logo {
+    display: block;
+    width: 1.75rem;
     color: var(--fg);
-    transform: translate(1px, -1px);
   }
 
-  @media (max-width: 420px) {
-    .links a {
-      grid-template-columns: 5rem 1fr auto;
+  .footer-logo :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 56rem) {
+    .facts {
+      grid-template-columns: 1fr;
+    }
+
+    .hero {
+      grid-template-columns: 1fr;
+      align-items: start;
+      /* Extra height goes below the content, not between portrait and name. */
+      align-content: start;
+      gap: 0.5rem;
+      padding-block: 1rem 0;
+    }
+
+    /* The sketch's bottom ~12% is its soft fade, so tuck the name up into it. */
+    .portrait {
+      order: -1;
+      justify-self: center;
+      width: 100%;
+      max-width: 22rem;
+      margin-left: 0;
+      margin-bottom: -1.25rem;
+    }
+
+    .portrait :global(img) {
+      width: 100%;
+      margin-inline: auto;
     }
   }
 </style>
