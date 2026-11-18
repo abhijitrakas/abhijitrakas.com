@@ -2,25 +2,55 @@
 import '@fontsource-variable/inter';
 import '@fontsource-variable/source-serif-4/opsz.css';
 import '../styles/global.css';
-import { site } from '../data/site';
+import { getImage } from 'astro:assets';
+import SocialLinks from '../components/SocialLinks.astro';
+import logo from '../assets/logo.svg?raw';
+import portrait from '../assets/portrait.webp';
+import { site, pageTitle } from '../data/site';
 
 interface Props {
   title?: string;
   description?: string;
+  /** For pages that shouldn't appear in search results, like the 404 page. */
+  noindex?: boolean;
 }
 
-const { title = site.name, description = site.description } = Astro.props;
+const { title = pageTitle, description = site.bio, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.jpg', Astro.site);
 
-const person = {
+// Build-time year; a tiny script in the footer keeps it current between deploys.
+const year = new Date().getFullYear();
+
+// Structured data: tells search engines this is the profile page of a person.
+const home = new URL('/', Astro.site).href;
+const photo = await getImage({ src: portrait, width: 600, format: 'jpg' });
+const email = site.links.find((l) => l.href.startsWith('mailto:'))?.href;
+const structuredData = {
   '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: site.name,
-  url: site.url,
-  jobTitle: site.jobTitle,
-  worksFor: { '@type': 'Organization', name: site.company.name, url: site.company.url },
-  sameAs: site.links.filter((l) => l.href.startsWith('http')).map((l) => l.href),
+  '@graph': [
+    {
+      '@type': 'ProfilePage',
+      '@id': `${home}#profile`,
+      url: home,
+      name: pageTitle,
+      inLanguage: 'en',
+      mainEntity: { '@id': `${home}#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${home}#person`,
+      name: site.name,
+      url: home,
+      image: new URL(photo.src, Astro.site).href,
+      description: site.bio,
+      jobTitle: site.jobTitle,
+      worksFor: { '@type': 'Organization', name: site.company.name, url: site.company.url },
+      knowsAbout: site.skills,
+      ...(email && { email }),
+      sameAs: site.links.filter((l) => l.href.startsWith('http')).map((l) => l.href),
+    },
+  ],
 };
 ---
 
@@ -31,30 +61,111 @@ const person = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
 
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#fdf9f7" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="profile" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_IN" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={`Pencil sketch portrait of ${site.name}`} />
+    <meta property="profile:first_name" content={site.name.split(' ')[0]} />
+    <meta property="profile:last_name" content={site.name.split(' ').slice(1).join(' ')} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="Plain-text summary for AI agents" />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+    {!noindex && <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
   </head>
   <body>
-    <slot />
+    <div class="page">
+      <header>
+        <a class="logo reveal" style="--i: 0" href="/" aria-label={`${site.name}, home`} set:html={logo} />
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer class="footer">
+        <div class="signoff">
+          <span class="footer-logo" aria-hidden="true" set:html={logo} />
+          <p>© <span id="year">{year}</span></p>
+        </div>
+        <SocialLinks size="small" />
+        <script is:inline>
+          document.getElementById('year').textContent = new Date().getFullYear();
+        </script>
+      </footer>
+    </div>
   </body>
 </html>
+
+<style>
+  /* Column layout keeps the footer at the bottom when the page is short. */
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    max-width: 96rem;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 3vw, 2.75rem) clamp(1rem, 7.6vw, 7.5rem) clamp(2rem, 4vw, 3rem);
+  }
+
+  main {
+    flex: 1;
+  }
+
+  .logo {
+    display: block;
+    width: clamp(3rem, 4.2vw, 4rem);
+    color: var(--fg);
+    border-radius: 2px;
+  }
+
+  .logo :global(svg),
+  .footer-logo :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .signoff {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .footer-logo {
+    display: block;
+    width: 1.75rem;
+    color: var(--fg);
+  }
+</style>

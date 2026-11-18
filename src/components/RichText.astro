@@ -1,0 +1,27 @@
+---
+// Renders plain text from site.ts, turning known phrases into links and keeping
+// year ranges like “2020–21” from breaking across lines.
+import { site } from '../data/site';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const yearRange = '\\d{4}–\\d{2,4}';
+const pattern = new RegExp(`(${[...Object.keys(site.autolinks).map(escape), yearRange].join('|')})`, 'g');
+const parts = text.split(pattern).filter(Boolean);
+---
+
+{
+  parts.map((part) =>
+    site.autolinks[part] ? (
+      <a href={site.autolinks[part]}>{part}</a>
+    ) : new RegExp(`^${yearRange}$`).test(part) ? (
+      <span style="white-space: nowrap">{part}</span>
+    ) : (
+      part
+    ),
+  )
+}
