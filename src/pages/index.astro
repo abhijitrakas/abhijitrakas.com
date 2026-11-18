@@ -51,14 +51,14 @@ import { site } from '../data/site';
 </Base>
 
 <style>
-  /* Padding scales with screen height so the hero roughly fills a desktop
-     first screen without leaving a void on tall windows. */
+  /* Top padding scales with screen height so the hero roughly fills a desktop
+     first screen. No bottom padding: the portrait's faded edge is the gap. */
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     align-items: center;
     gap: 2rem;
-    padding-block: clamp(1.5rem, 6vh, 4rem);
+    padding-block: clamp(1.5rem, 6vh, 4rem) 0;
   }
 
   /* Keep text above the sketch's hatching where they overlap. */
@@ -129,7 +129,7 @@ import { site } from '../data/site';
   }
 
   .more {
-    padding-block: clamp(3.5rem, 7vw, 6rem);
+    padding-block: clamp(3.5rem, 4vw, 4rem) clamp(3.5rem, 7vw, 6rem);
   }
 
   h2 {
